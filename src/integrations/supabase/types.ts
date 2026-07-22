@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      providers: {
+        Row: {
+          capacidad: string
+          ciudad: string
+          convenio: boolean
+          costo_estimado: string
+          costo_nivel: string
+          created_at: string
+          distancia_km: number
+          especialidades: string[]
+          google_rating: number
+          historial_aprobacion: number
+          hospital: string
+          id: string
+          tiempo_programado_min: number
+          tiempo_urgencia_min: number
+        }
+        Insert: {
+          capacidad: string
+          ciudad: string
+          convenio?: boolean
+          costo_estimado: string
+          costo_nivel: string
+          created_at?: string
+          distancia_km: number
+          especialidades?: string[]
+          google_rating: number
+          historial_aprobacion?: number
+          hospital: string
+          id?: string
+          tiempo_programado_min: number
+          tiempo_urgencia_min: number
+        }
+        Update: {
+          capacidad?: string
+          ciudad?: string
+          convenio?: boolean
+          costo_estimado?: string
+          costo_nivel?: string
+          created_at?: string
+          distancia_km?: number
+          especialidades?: string[]
+          google_rating?: number
+          historial_aprobacion?: number
+          hospital?: string
+          id?: string
+          tiempo_programado_min?: number
+          tiempo_urgencia_min?: number
+        }
+        Relationships: []
+      }
       recommendation_requests: {
         Row: {
           ciudad: string | null
