@@ -32,8 +32,8 @@ export const RecommendationService = {
         ciudad: request.ciudad,
         tratamiento: request.tratamiento,
         tipo_servicio: request.tipoServicio,
-        json_request: request as unknown as Record<string, unknown>,
-        json_response: response as unknown as Record<string, unknown>,
+        json_request: request as never,
+        json_response: response as never,
       });
       if (error) console.error("[RecommendationService] persist error:", error);
     } catch (err) {
