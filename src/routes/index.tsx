@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Ranking explicable de clínicas para autorizar siniestros: costo, distancia, capacidad, especialización, reviews e historial.",
+          "Sistema inteligente que recomienda proveedores médicos para autorizaciones de siniestros de salud, con explicabilidad y auditoría.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
