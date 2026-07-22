@@ -1,24 +1,46 @@
+import { supabase } from "@/integrations/supabase/client";
 import type { ClaimRequest, RecommendationResponse } from "@/types/recommendation";
 
 /**
  * RecommendationService
  * Abstrae la fuente de datos de recomendaciones.
- * Hoy: mock. Mañana: POST /api/recommendations.
+ * Hoy: mock local + persistencia en Lovable Cloud.
+ * Mañana: POST /api/recommendations (Machine Learning).
  */
 export const RecommendationService = {
   async getRecommendations(request: ClaimRequest): Promise<RecommendationResponse> {
     // Simular latencia de red / motor de IA
     await new Promise((r) => setTimeout(r, 1600));
 
-    // TODO: reemplazar por fetch real
+    // TODO: reemplazar por fetch real al modelo de ML
     // const res = await fetch("/api/recommendations", {
     //   method: "POST",
     //   headers: { "Content-Type": "application/json" },
     //   body: JSON.stringify(request),
     // });
-    // return res.json();
+    // const response: RecommendationResponse = await res.json();
 
-    return buildMock(request);
+    const response = buildMock(request);
+
+    // Persistir el historial de la búsqueda en la base de datos
+    try {
+      const { error } = await supabase.from("recommendation_requests").insert({
+        usuario: null, // TODO: reemplazar cuando exista autenticación de operadores
+        poliza: request.poliza,
+        paciente: request.nombre,
+        documento: request.documento,
+        ciudad: request.ciudad,
+        tratamiento: request.tratamiento,
+        tipo_servicio: request.tipoServicio,
+        json_request: request as unknown as Record<string, unknown>,
+        json_response: response as unknown as Record<string, unknown>,
+      });
+      if (error) console.error("[RecommendationService] persist error:", error);
+    } catch (err) {
+      console.error("[RecommendationService] persist exception:", err);
+    }
+
+    return response;
   },
 };
 
