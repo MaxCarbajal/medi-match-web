@@ -1,143 +1,113 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { ClaimRequest, RecommendationResponse } from "@/types/recommendation";
+import type { ClaimRequest, RecommendationResponse, Recommendation } from "@/types/recommendation";
 
 /**
  * RecommendationService
- * Abstrae la fuente de datos de recomendaciones.
- * Hoy: mock local + persistencia en Lovable Cloud.
- * Mañana: POST /api/recommendations (Machine Learning).
+ * Lee proveedores desde Supabase, calcula scoring y persiste el historial.
  */
 export const RecommendationService = {
   async getRecommendations(request: ClaimRequest): Promise<RecommendationResponse> {
-    // Simular latencia de red / motor de IA
-    await new Promise((r) => setTimeout(r, 1600));
+    // 1. Traer proveedores del catálogo (filtrando por ciudad si aplica)
+    let query = supabase.from("providers").select("*");
+    if (request.ciudad) query = query.ilike("ciudad", `%${request.ciudad}%`);
 
-    // TODO: reemplazar por fetch real al modelo de ML
-    // const res = await fetch("/api/recommendations", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(request),
-    // });
-    // const response: RecommendationResponse = await res.json();
-
-    const response = buildMock(request);
-
-    // Persistir el historial de la búsqueda en la base de datos
-    try {
-      const { error } = await supabase.from("recommendation_requests").insert({
-        usuario: null, // TODO: reemplazar cuando exista autenticación de operadores
-        poliza: request.poliza,
-        paciente: request.nombre,
-        documento: request.documento,
-        ciudad: request.ciudad,
-        tratamiento: request.tratamiento,
-        tipo_servicio: request.tipoServicio,
-        json_request: request as never,
-        json_response: response as never,
-      });
-      if (error) console.error("[RecommendationService] persist error:", error);
-    } catch (err) {
-      console.error("[RecommendationService] persist exception:", err);
+    const { data: providers, error } = await query;
+    if (error) {
+      console.error("[RecommendationService] fetch providers error:", error);
+      throw new Error("No se pudieron obtener los proveedores");
     }
+
+    // Fallback: si no hay match por ciudad, tomar todos
+    let pool = providers ?? [];
+    if (pool.length === 0) {
+      const { data: all } = await supabase.from("providers").select("*");
+      pool = all ?? [];
+    }
+
+    // 2. Calcular score de cada proveedor
+    const isUrgencia = request.tipoServicio === "urgencia";
+    const tratamiento = (request.tratamiento || "").toLowerCase();
+
+    const scored: Recommendation[] = pool.map((p, idx) => {
+      const especializacion = p.especialidades?.some((e: string) =>
+        e.toLowerCase().includes(tratamiento) || tratamiento.includes(e.toLowerCase())
+      )
+        ? 20
+        : 12;
+
+      const costoScore = p.costo_nivel === "$" ? 25 : p.costo_nivel === "$$" ? 22 : 16;
+      const distanciaScore = Math.max(5, Math.round(20 - Number(p.distancia_km) * 1.2));
+      const capacidadScore = p.capacidad === "Alta" ? 15 : p.capacidad === "Media" ? 11 : 7;
+      const googleScore = Math.round(Number(p.google_rating) * 2);
+      const historialScore = Math.round(Number(p.historial_aprobacion) * 10);
+
+      const breakdown = {
+        costo: costoScore,
+        distancia: distanciaScore,
+        capacidad: capacidadScore,
+        especializacion,
+        google: googleScore,
+        historial: historialScore,
+      };
+      const score = Math.min(
+        99,
+        breakdown.costo + breakdown.distancia + breakdown.capacidad +
+        breakdown.especializacion + breakdown.google + breakdown.historial
+      );
+
+      const reasons: string[] = [];
+      if (p.convenio) reasons.push("Convenio preferencial con la aseguradora");
+      if (Number(p.distancia_km) < 5) reasons.push(`Se encuentra a solo ${p.distancia_km} km del paciente`);
+      if (p.capacidad === "Alta") reasons.push("Alta disponibilidad para atención inmediata");
+      if (Number(p.google_rating) >= 4.5) reasons.push(`Calificación Google de ${p.google_rating}/5`);
+      if (especializacion === 20) reasons.push("Especializada en el tratamiento solicitado");
+      if (Number(p.historial_aprobacion) >= 0.9) reasons.push("Históricamente presenta baja tasa de rechazos");
+      if (p.costo_nivel !== "$$$") reasons.push("Buena relación costo-beneficio");
+
+      const tiempoMin = isUrgencia ? p.tiempo_urgencia_min : p.tiempo_programado_min;
+      const tiempoRespuesta = tiempoMin < 60 ? `${tiempoMin} min` : `${(tiempoMin / 60).toFixed(1)} h`;
+
+      return {
+        id: idx + 1,
+        hospital: p.hospital,
+        especialidad: request.tratamiento || p.especialidades?.[0] || "Medicina General",
+        ciudad: p.ciudad,
+        distancia: Number(p.distancia_km),
+        costoEstimado: p.costo_estimado,
+        costoNivel: p.costo_nivel as "$" | "$$" | "$$$",
+        tiempoRespuesta,
+        capacidad: p.capacidad as "Alta" | "Media" | "Baja",
+        google: Number(p.google_rating),
+        score,
+        convenio: p.convenio,
+        reasons,
+        breakdown,
+      };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    const top = scored.slice(0, 4).map((r, i) => ({ ...r, id: i + 1 }));
+
+    const response: RecommendationResponse = {
+      requestId: crypto.randomUUID(),
+      generatedAt: new Date().toISOString(),
+      recommendations: top,
+    };
+
+    // 3. Persistir el historial de la búsqueda
+    const { error: insertError } = await supabase.from("recommendation_requests").insert({
+      usuario: null,
+      poliza: request.poliza,
+      paciente: request.nombre,
+      documento: request.documento,
+      ciudad: request.ciudad,
+      tratamiento: request.tratamiento,
+      tipo_servicio: request.tipoServicio,
+      json_request: request as never,
+      json_response: response as never,
+    });
+    if (insertError) console.error("[RecommendationService] persist error:", insertError);
 
     return response;
   },
 };
-
-function buildMock(req: ClaimRequest): RecommendationResponse {
-  const base = [
-    {
-      id: 1,
-      hospital: "Clínica Caracas",
-      especialidad: req.tratamiento || "Medicina General",
-      ciudad: req.ciudad || "Caracas",
-      distancia: 2.3,
-      costoEstimado: "$1.850",
-      costoNivel: "$$" as const,
-      tiempoRespuesta: req.tipoServicio === "urgencia" ? "12 min" : "1.5 h",
-      capacidad: "Alta" as const,
-      google: 4.8,
-      score: 94,
-      convenio: true,
-      reasons: [
-        "Excelente relación costo-beneficio",
-        "Alta disponibilidad para atención inmediata",
-        "Se encuentra a solo 2.3 km del paciente",
-        "Calificación Google de 4.8/5",
-        "Especializada en el tratamiento solicitado",
-        "Históricamente presenta baja tasa de rechazos",
-        "Convenio preferencial con la aseguradora",
-      ],
-      breakdown: { costo: 24, distancia: 19, capacidad: 14, especializacion: 19, google: 9, historial: 9 },
-    },
-    {
-      id: 2,
-      hospital: "Centro Médico La Trinidad",
-      especialidad: req.tratamiento || "Medicina General",
-      ciudad: req.ciudad || "Caracas",
-      distancia: 4.2,
-      costoEstimado: "$2.340",
-      costoNivel: "$$$" as const,
-      tiempoRespuesta: req.tipoServicio === "urgencia" ? "18 min" : "2 h",
-      capacidad: "Media" as const,
-      google: 4.7,
-      score: 88,
-      convenio: true,
-      reasons: [
-        "Especialistas certificados disponibles",
-        "Alta calidad clínica reconocida",
-        "Muy buenas opiniones de pacientes",
-        "Convenio activo con la aseguradora",
-        "Historial estable de aprobaciones",
-      ],
-      breakdown: { costo: 19, distancia: 17, capacidad: 12, especializacion: 18, google: 9, historial: 8 },
-    },
-    {
-      id: 3,
-      hospital: "Hospital Metropolitano",
-      especialidad: req.tratamiento || "Medicina General",
-      ciudad: req.ciudad || "Caracas",
-      distancia: 6.8,
-      costoEstimado: "$1.620",
-      costoNivel: "$$" as const,
-      tiempoRespuesta: req.tipoServicio === "urgencia" ? "22 min" : "3 h",
-      capacidad: "Alta" as const,
-      google: 4.5,
-      score: 82,
-      convenio: false,
-      reasons: [
-        "Buen costo estimado del procedimiento",
-        "Alta capacidad operativa",
-        "Amplia cobertura de especialidades",
-        "Tiempos de respuesta razonables",
-      ],
-      breakdown: { costo: 23, distancia: 13, capacidad: 14, especializacion: 15, google: 8, historial: 9 },
-    },
-    {
-      id: 4,
-      hospital: "Policlínica Metropolitana",
-      especialidad: req.tratamiento || "Medicina General",
-      ciudad: req.ciudad || "Caracas",
-      distancia: 8.5,
-      costoEstimado: "$2.910",
-      costoNivel: "$$$" as const,
-      tiempoRespuesta: req.tipoServicio === "urgencia" ? "28 min" : "4 h",
-      capacidad: "Baja" as const,
-      google: 4.3,
-      score: 71,
-      convenio: false,
-      reasons: [
-        "Reconocimiento clínico establecido",
-        "Buenas opiniones de pacientes",
-        "Cobertura del tratamiento solicitado",
-      ],
-      breakdown: { costo: 15, distancia: 10, capacidad: 9, especializacion: 16, google: 8, historial: 13 },
-    },
-  ];
-
-  return {
-    requestId: crypto.randomUUID(),
-    generatedAt: new Date().toISOString(),
-    recommendations: base,
-  };
-}
