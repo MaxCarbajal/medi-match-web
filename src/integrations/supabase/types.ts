@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      recommendation_requests: {
+        Row: {
+          ciudad: string | null
+          created_at: string
+          documento: string | null
+          id: string
+          json_request: Json
+          json_response: Json
+          paciente: string
+          poliza: string
+          tipo_servicio: string | null
+          tratamiento: string | null
+          usuario: string | null
+        }
+        Insert: {
+          ciudad?: string | null
+          created_at?: string
+          documento?: string | null
+          id?: string
+          json_request: Json
+          json_response: Json
+          paciente: string
+          poliza: string
+          tipo_servicio?: string | null
+          tratamiento?: string | null
+          usuario?: string | null
+        }
+        Update: {
+          ciudad?: string | null
+          created_at?: string
+          documento?: string | null
+          id?: string
+          json_request?: Json
+          json_response?: Json
+          paciente?: string
+          poliza?: string
+          tipo_servicio?: string | null
+          tratamiento?: string | null
+          usuario?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
