@@ -141,7 +141,7 @@ export function ClaimForm({ onSubmit, loading }: Props) {
         </div>
       </FormSection>
 
-      <div className="flex items-center justify-end gap-3 border-t border-border pt-6">
+      <div className="flex flex-col-reverse items-stretch gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-end">
         <Button
           type="button"
           variant="ghost"
@@ -154,7 +154,7 @@ export function ClaimForm({ onSubmit, loading }: Props) {
           type="submit"
           size="lg"
           disabled={!canSubmit || loading}
-          className="gap-2 bg-brand text-brand-foreground shadow-sm hover:bg-brand/90"
+          className="w-full gap-2 bg-brand text-brand-foreground shadow-sm hover:bg-brand/90 sm:w-auto"
         >
           <Search className="h-4 w-4" />
           Buscar proveedores recomendados
