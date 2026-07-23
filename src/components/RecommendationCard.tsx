@@ -23,12 +23,12 @@ export function RecommendationCard({ rec, rank, onDetail }: Props) {
       }
     >
       <div className={"h-1 w-full " + (isTop ? "bg-brand" : "bg-border")} />
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <div className="grid gap-6 lg:grid-cols-[1fr_auto]">
           {/* LEFT */}
           <div className="space-y-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <div className="mb-1.5 flex flex-wrap items-center gap-2">
                   {isTop ? (
                     <Badge className="gap-1 bg-brand text-brand-foreground hover:bg-brand">
@@ -44,9 +44,9 @@ export function RecommendationCard({ rec, rank, onDetail }: Props) {
                   )}
                   <Badge variant="outline" className="text-muted-foreground">{rec.especialidad}</Badge>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">{rec.hospital}</h3>
+                <h3 className="text-base font-semibold text-foreground sm:text-lg">{rec.hospital}</h3>
                 <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5" /> {rec.ciudad} · {rec.distancia} km
+                  <MapPin className="h-3.5 w-3.5 shrink-0" /> {rec.ciudad} · {rec.distancia} km
                 </div>
               </div>
             </div>
@@ -77,7 +77,7 @@ export function RecommendationCard({ rec, rank, onDetail }: Props) {
 
           {/* RIGHT — score panel */}
           <div className="lg:w-72">
-            <div className="rounded-xl border border-border bg-surface-muted/60 p-5">
+            <div className="rounded-xl border border-border bg-surface-muted/60 p-4 sm:p-5">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Score total
               </div>
