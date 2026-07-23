@@ -55,16 +55,16 @@ function Index() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="mx-auto max-w-[1400px] px-6 py-8">
+      <main className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-8">
         {/* Page header */}
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4 sm:mb-8">
+          <div className="min-w-0">
+            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
               <span className="rounded bg-brand-soft px-2 py-0.5 text-brand">Autorizaciones</span>
               <span>/</span>
               <span>Nueva recomendación</span>
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               {showResults ? "Proveedores recomendados" : "Registrar siniestro"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -79,7 +79,7 @@ function Index() {
               onClick={() => {
                 setResponse(null);
               }}
-              className="gap-2"
+              className="w-full gap-2 sm:w-auto"
             >
               <ArrowLeft className="h-4 w-4" /> Nueva búsqueda
             </Button>
