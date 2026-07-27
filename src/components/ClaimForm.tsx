@@ -22,7 +22,6 @@ const initial: ClaimRequest = {
   ciudad: "",
   fecha: new Date().toISOString().slice(0, 10),
   producto: "",
-  diagnostico: "",
   observaciones: "",
   tratamiento: "",
   tipoServicio: "programado",
@@ -96,9 +95,6 @@ export function ClaimForm({ onSubmit, loading }: Props) {
                 <SelectItem value="salud-corporativa">Salud Corporativa</SelectItem>
               </SelectContent>
             </Select>
-          </Field>
-          <Field label="Diagnóstico">
-            <Input value={data.diagnostico} onChange={(e) => set("diagnostico", e.target.value)} placeholder="Ej. Apendicitis aguda" />
           </Field>
           <div className="md:col-span-2">
             <Field label="Observaciones">
