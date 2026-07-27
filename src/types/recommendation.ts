@@ -6,7 +6,6 @@ export interface ClaimRequest {
   ciudad: string;
   fecha: string;
   producto: string;
-  diagnostico: string;
   observaciones: string;
   tratamiento: string;
   tipoServicio: "programado" | "urgencia";
