@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, User, FileText, Stethoscope } from "lucide-react";
+import { Search, User, FileText, Stethoscope, Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { CITIES } from "@/lib/cities";
+import { cn } from "@/lib/utils";
 import type { ClaimRequest } from "@/types/recommendation";
 
 interface Props {
