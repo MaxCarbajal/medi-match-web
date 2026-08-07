@@ -33,6 +33,7 @@ const initial: ClaimRequest = {
 
 export function ClaimForm({ onSubmit, loading }: Props) {
   const [data, setData] = useState<ClaimRequest>(initial);
+  const [cityOpen, setCityOpen] = useState(false);
 
   const set = <K extends keyof ClaimRequest>(k: K, v: ClaimRequest[K]) =>
     setData((d) => ({ ...d, [k]: v }));
