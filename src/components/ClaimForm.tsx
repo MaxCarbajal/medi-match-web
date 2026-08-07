@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { CITIES } from "@/lib/cities";
+import { TREATMENTS } from "@/lib/treatments";
 import { cn } from "@/lib/utils";
 import type { ClaimRequest } from "@/types/recommendation";
 
@@ -34,6 +35,7 @@ const initial: ClaimRequest = {
 export function ClaimForm({ onSubmit, loading }: Props) {
   const [data, setData] = useState<ClaimRequest>(initial);
   const [cityOpen, setCityOpen] = useState(false);
+  const [treatmentOpen, setTreatmentOpen] = useState(false);
 
   const set = <K extends keyof ClaimRequest>(k: K, v: ClaimRequest[K]) =>
     setData((d) => ({ ...d, [k]: v }));
@@ -85,7 +87,11 @@ export function ClaimForm({ onSubmit, loading }: Props) {
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Ciudad" required>
-            <CityCombobox
+            <SearchCombobox
+              items={CITIES}
+              placeholder="Selecciona ciudad"
+              searchPlaceholder="Buscar ciudad..."
+              emptyText="No se encontró la ciudad."
               value={data.ciudad}
               onChange={(v) => set("ciudad", v)}
               open={cityOpen}
@@ -126,7 +132,16 @@ export function ClaimForm({ onSubmit, loading }: Props) {
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Tratamiento" required>
-            <Input value={data.tratamiento} onChange={(e) => set("tratamiento", e.target.value)} placeholder="Ej. Cirugía general" />
+            <SearchCombobox
+              items={TREATMENTS}
+              placeholder="Selecciona tratamiento"
+              searchPlaceholder="Buscar tratamiento..."
+              emptyText="No se encontró el tratamiento."
+              value={data.tratamiento}
+              onChange={(v) => set("tratamiento", v)}
+              open={treatmentOpen}
+              onOpenChange={setTreatmentOpen}
+            />
           </Field>
           <Field label="Tipo de servicio">
             <RadioGroup
@@ -218,12 +233,20 @@ function Field({
   );
 }
 
-function CityCombobox({
+function SearchCombobox({
+  items,
+  placeholder,
+  searchPlaceholder,
+  emptyText,
   value,
   onChange,
   open,
   onOpenChange,
 }: {
+  items: string[];
+  placeholder: string;
+  searchPlaceholder: string;
+  emptyText: string;
   value: string;
   onChange: (value: string) => void;
   open: boolean;
@@ -236,33 +259,33 @@ function CityCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between bg-surface font-normal"
+          className="w-full justify-between bg-surface text-left font-normal"
         >
           <span className={cn("truncate", !value && "text-muted-foreground")}>
-            {value || "Selecciona ciudad"}
+            {value || placeholder}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] p-0" align="start">
+      <PopoverContent className="w-[min(90vw,520px)] min-w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Buscar ciudad..." />
+          <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
-            <CommandEmpty>No se encontró la ciudad.</CommandEmpty>
+            <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup className="max-h-[260px] overflow-y-auto">
-              {CITIES.map((city) => (
+              {items.map((item) => (
                 <CommandItem
-                  key={city}
-                  value={city}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue);
+                  key={item}
+                  value={item}
+                  onSelect={() => {
+                    onChange(item === value ? "" : item);
                     onOpenChange(false);
                   }}
                 >
                   <Check
-                    className={cn("mr-2 h-4 w-4", value === city ? "opacity-100" : "opacity-0")}
+                    className={cn("mr-2 h-4 w-4 shrink-0", value === item ? "opacity-100" : "opacity-0")}
                   />
-                  {city}
+                  <span className="text-xs leading-snug">{item}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
