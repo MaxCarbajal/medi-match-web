@@ -243,7 +243,7 @@ function SearchCombobox({
   open,
   onOpenChange,
 }: {
-  items: string[];
+  items: readonly string[];
   placeholder: string;
   searchPlaceholder: string;
   emptyText: string;
