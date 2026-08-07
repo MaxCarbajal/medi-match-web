@@ -85,7 +85,12 @@ export function ClaimForm({ onSubmit, loading }: Props) {
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Ciudad" required>
-            <Input value={data.ciudad} onChange={(e) => set("ciudad", e.target.value)} placeholder="Caracas" />
+            <CityCombobox
+              value={data.ciudad}
+              onChange={(v) => set("ciudad", v)}
+              open={cityOpen}
+              onOpenChange={setCityOpen}
+            />
           </Field>
           <Field label="Fecha">
             <Input type="date" value={data.fecha} onChange={(e) => set("fecha", e.target.value)} />
