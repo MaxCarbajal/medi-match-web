@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, User, FileText, Stethoscope } from "lucide-react";
+import { Search, User, FileText, Stethoscope, Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { CITIES } from "@/lib/cities";
+import { cn } from "@/lib/utils";
 import type { ClaimRequest } from "@/types/recommendation";
 
 interface Props {
@@ -29,6 +33,7 @@ const initial: ClaimRequest = {
 
 export function ClaimForm({ onSubmit, loading }: Props) {
   const [data, setData] = useState<ClaimRequest>(initial);
+  const [cityOpen, setCityOpen] = useState(false);
 
   const set = <K extends keyof ClaimRequest>(k: K, v: ClaimRequest[K]) =>
     setData((d) => ({ ...d, [k]: v }));
@@ -80,7 +85,12 @@ export function ClaimForm({ onSubmit, loading }: Props) {
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Ciudad" required>
-            <Input value={data.ciudad} onChange={(e) => set("ciudad", e.target.value)} placeholder="Caracas" />
+            <CityCombobox
+              value={data.ciudad}
+              onChange={(v) => set("ciudad", v)}
+              open={cityOpen}
+              onOpenChange={setCityOpen}
+            />
           </Field>
           <Field label="Fecha">
             <Input type="date" value={data.fecha} onChange={(e) => set("fecha", e.target.value)} />
@@ -205,5 +215,60 @@ function Field({
       </Label>
       {children}
     </div>
+  );
+}
+
+function CityCombobox({
+  value,
+  onChange,
+  open,
+  onOpenChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between bg-surface font-normal"
+        >
+          <span className={cn("truncate", !value && "text-muted-foreground")}>
+            {value || "Selecciona ciudad"}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Buscar ciudad..." />
+          <CommandList>
+            <CommandEmpty>No se encontró la ciudad.</CommandEmpty>
+            <CommandGroup className="max-h-[260px] overflow-y-auto">
+              {CITIES.map((city) => (
+                <CommandItem
+                  key={city}
+                  value={city}
+                  onSelect={(currentValue) => {
+                    onChange(currentValue === value ? "" : currentValue);
+                    onOpenChange(false);
+                  }}
+                >
+                  <Check
+                    className={cn("mr-2 h-4 w-4", value === city ? "opacity-100" : "opacity-0")}
+                  />
+                  {city}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
