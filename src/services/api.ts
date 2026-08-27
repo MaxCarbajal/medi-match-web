@@ -44,9 +44,9 @@ export const ProviderService = {
 };
 
 export const FiltrosService = {
-  listarCiudades: () => get<string[]>("/ciudades"),
-  listarTratamientos: (ciudad: string) =>
-    get<string[]>(`/tratamientos?ciudad=${encodeURIComponent(ciudad)}`),
+  listarMunicipios: () => get<string[]>("/municipios"),
+  listarTratamientos: (municipio: string) =>
+    get<string[]>(`/tratamientos?municipio=${encodeURIComponent(municipio)}`),
 };
 
 export const ClienteService = {

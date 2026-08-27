@@ -41,32 +41,32 @@ const hoy = new Date().toISOString().slice(0, 10);
 
 export function SearchForm({ onSubmit, loading, initialCliente }: Props) {
   const [cliente, setCliente] = useState<Cliente | null>(initialCliente ?? null);
-  const [ciudad, setCiudad] = useState("");
+  const [municipio, setMunicipio] = useState("");
   const [fechaServicio, setFechaServicio] = useState(hoy);
   const [observaciones, setObservaciones] = useState("");
   const [tratamiento, setTratamiento] = useState("");
   const [tipoServicio, setTipoServicio] = useState<TipoServicio>("programado");
   const [umbralValoracion, setUmbralValoracion] = useState(0);
-  const [cityOpen, setCityOpen] = useState(false);
+  const [municipioOpen, setMunicipioOpen] = useState(false);
   const [treatmentOpen, setTreatmentOpen] = useState(false);
 
-  const { data: ciudades = [], isLoading: loadingCiudades } = useQuery({
-    queryKey: ["ciudades"],
-    queryFn: FiltrosService.listarCiudades,
+  const { data: municipios = [], isLoading: loadingMunicipios } = useQuery({
+    queryKey: ["municipios"],
+    queryFn: FiltrosService.listarMunicipios,
   });
 
   const { data: tratamientos = [], isLoading: loadingTratamientos } = useQuery({
-    queryKey: ["tratamientos", ciudad],
-    queryFn: () => FiltrosService.listarTratamientos(ciudad),
-    enabled: !!ciudad,
+    queryKey: ["tratamientos", municipio],
+    queryFn: () => FiltrosService.listarTratamientos(municipio),
+    enabled: !!municipio,
   });
 
-  const handleCiudadChange = (v: string) => {
-    setCiudad(v);
-    setTratamiento(""); // el tratamiento anterior puede no existir en la ciudad nueva
+  const handleMunicipioChange = (v: string) => {
+    setMunicipio(v);
+    setTratamiento(""); // el tratamiento anterior puede no existir en el municipio nuevo
   };
 
-  const canSubmit = !!cliente && !!ciudad && !!tratamiento;
+  const canSubmit = !!cliente && !!municipio && !!tratamiento;
 
   return (
     <form
@@ -74,7 +74,7 @@ export function SearchForm({ onSubmit, loading, initialCliente }: Props) {
         e.preventDefault();
         if (!cliente || !canSubmit) return;
         onSubmit({
-          ciudad,
+          municipio,
           tratamiento,
           umbral_valoracion: umbralValoracion,
           cliente,
@@ -99,18 +99,18 @@ export function SearchForm({ onSubmit, loading, initialCliente }: Props) {
         description="Contexto de la búsqueda"
       >
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Ciudad" required>
+          <Field label="Municipio" required>
             <SearchCombobox
-              items={ciudades}
-              placeholder={loadingCiudades ? "Cargando ciudades..." : "Selecciona ciudad"}
-              searchPlaceholder="Buscar ciudad..."
-              emptyText="No se encontró la ciudad."
-              value={ciudad}
-              onChange={handleCiudadChange}
-              open={cityOpen}
-              onOpenChange={setCityOpen}
-              disabled={loadingCiudades}
-              loading={loadingCiudades}
+              items={municipios}
+              placeholder={loadingMunicipios ? "Cargando municipios..." : "Selecciona municipio"}
+              searchPlaceholder="Buscar municipio..."
+              emptyText="No se encontró el municipio."
+              value={municipio}
+              onChange={handleMunicipioChange}
+              open={municipioOpen}
+              onOpenChange={setMunicipioOpen}
+              disabled={loadingMunicipios}
+              loading={loadingMunicipios}
             />
           </Field>
           <Field label="Fecha">
@@ -143,19 +143,19 @@ export function SearchForm({ onSubmit, loading, initialCliente }: Props) {
             <SearchCombobox
               items={tratamientos}
               placeholder={
-                !ciudad
-                  ? "Selecciona una ciudad primero"
+                !municipio
+                  ? "Selecciona un municipio primero"
                   : loadingTratamientos
                     ? "Cargando tratamientos..."
                     : "Selecciona tratamiento"
               }
               searchPlaceholder="Buscar tratamiento..."
-              emptyText="Esta ciudad no ofrece tratamientos registrados."
+              emptyText="Este municipio no ofrece tratamientos registrados."
               value={tratamiento}
               onChange={setTratamiento}
               open={treatmentOpen}
               onOpenChange={setTreatmentOpen}
-              disabled={!ciudad || loadingTratamientos}
+              disabled={!municipio || loadingTratamientos}
               loading={loadingTratamientos}
             />
           </Field>

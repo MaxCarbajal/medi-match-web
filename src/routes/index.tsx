@@ -23,13 +23,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Busca proveedores médicos por ciudad y tratamiento, ve resultados ordenados por afinidad y reserva un cupo en tiempo real.",
+          "Busca proveedores médicos por municipio y tratamiento, ve resultados ordenados por afinidad y reserva un cupo en tiempo real.",
       },
       { property: "og:title", content: "MediMatch AI · Recomendación de proveedores médicos" },
       {
         property: "og:description",
         content:
-          "Busca proveedores médicos por ciudad y tratamiento, ve resultados ordenados por afinidad y reserva un cupo en tiempo real.",
+          "Busca proveedores médicos por municipio y tratamiento, ve resultados ordenados por afinidad y reserva un cupo en tiempo real.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -68,7 +68,7 @@ function Index({ gestor }: { gestor: Gestor }) {
     setLoading(true);
     try {
       const results = await ProviderService.recomendar({
-        ciudad: data.ciudad,
+        municipio: data.municipio,
         tratamiento: data.tratamiento,
         umbral_valoracion: data.umbral_valoracion,
       });
@@ -88,7 +88,7 @@ function Index({ gestor }: { gestor: Gestor }) {
     try {
       const res = await ProviderService.reservar({
         id_proveedor: proveedor.id_proveedor,
-        ciudad: busqueda.ciudad,
+        municipio: busqueda.municipio,
         tratamiento: busqueda.tratamiento,
         id_cliente: busqueda.cliente.id_cliente,
         id_gestor: gestor.id_gestor,
@@ -199,7 +199,7 @@ function SidePanel() {
       <ol className="space-y-3 text-sm text-muted-foreground">
         {[
           "Busca al asegurado por póliza, documento o nombre.",
-          "Indica ciudad, tratamiento y valoración mínima.",
+          "Indica municipio, tratamiento y valoración mínima.",
           "El motor evalúa precio y valoración para rankear proveedores.",
           "Selecciona un proveedor para reservar un cupo — la capacidad se descuenta al instante.",
         ].map((t, i) => (
@@ -219,7 +219,7 @@ function RequestSummary({ busqueda, count }: { busqueda: BusquedaFormData; count
   const rows: [string, string][] = [
     ["Paciente", busqueda.cliente.nombre_completo],
     ["Póliza", busqueda.cliente.poliza],
-    ["Ciudad", busqueda.ciudad],
+    ["Municipio", busqueda.municipio],
     ["Tratamiento", busqueda.tratamiento],
     ["Fecha", busqueda.fechaServicio],
     ["Resultados", String(count)],

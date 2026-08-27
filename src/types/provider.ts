@@ -1,5 +1,5 @@
 export interface RecomendarRequest {
-  ciudad: string;
+  municipio: string;
   tratamiento: string;
   umbral_valoracion: number;
 }
@@ -11,6 +11,7 @@ export interface Proveedor {
   valoracion: number;
   capacidad_restante: number;
   indice_ranking: number;
+  modelo_aplicado: boolean;
 }
 
 export type TipoServicio = "programado" | "urgencia";
@@ -32,7 +33,7 @@ export interface BusquedaFormData extends RecomendarRequest {
 
 export interface ReservarRequest {
   id_proveedor: number;
-  ciudad: string;
+  municipio: string;
   tratamiento: string;
   id_cliente: string;
   id_gestor: string;
@@ -63,7 +64,7 @@ export interface AsignacionDetalle {
   tratamiento: string;
   observaciones?: string;
   nombre_proveedor: string;
-  ciudad: string;
+  municipio: string;
   id_cliente: string;
   nombre_cliente: string;
   poliza: string;

@@ -92,7 +92,7 @@ function AsignacionesPage() {
             <TableRow>
               <TableHead>Paciente</TableHead>
               <TableHead>Proveedor</TableHead>
-              <TableHead>Ciudad</TableHead>
+              <TableHead>Municipio</TableHead>
               <TableHead>Tratamiento</TableHead>
               <TableHead>Fecha servicio</TableHead>
               <TableHead>Tipo</TableHead>
@@ -148,7 +148,7 @@ function FilaAsignacion({ asignacion: a }: { asignacion: AsignacionDetalle }) {
         <div className="text-xs text-muted-foreground">Póliza {a.poliza}</div>
       </TableCell>
       <TableCell>{a.nombre_proveedor}</TableCell>
-      <TableCell>{a.ciudad}</TableCell>
+      <TableCell>{a.municipio}</TableCell>
       <TableCell className="max-w-[240px] truncate" title={a.tratamiento}>
         {a.tratamiento}
       </TableCell>
