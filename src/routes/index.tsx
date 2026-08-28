@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ListChecks, Pencil, Stethoscope } from "lucide-react";
+import { ArrowLeft, ListChecks, Pencil, Stethoscope, Target } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { SearchForm } from "@/components/SearchForm";
@@ -74,6 +74,7 @@ function Index({ gestor }: { gestor: Gestor }) {
       });
       setBusqueda(data);
       setProviders(results);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       console.error("[Index] recomendar error:", err);
       toast.error("No se pudo consultar el motor de recomendación.");
@@ -138,19 +139,32 @@ function Index({ gestor }: { gestor: Gestor }) {
             <span>/</span>
             <span>Proveedores médicos</span>
           </div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            {showResults ? "Proveedores recomendados" : "Registrar siniestro"}
-          </h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+              {showResults ? "Proveedores recomendados" : "Registrar siniestro"}
+            </h1>
+            {showResults && providers![0]?.modelo_aplicado && (
+              <Badge
+                className="gap-1 bg-brand text-brand-foreground hover:bg-brand"
+                title="Esta búsqueda tuvo suficientes proveedores alternativos para que el modelo de optimización calculara el ranking (coste, valoración y capacidad disponible)."
+              >
+                <Target className="h-3 w-3" /> Ranking optimizado
+              </Badge>
+            )}
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {showResults
-              ? "Ordenados por afinidad (precio + valoración). Selecciona uno para reservar un cupo."
+              ? "Ordenados por afinidad (precio + valoración + capacidad). Selecciona uno para reservar un cupo."
               : "Completa los datos del asegurado y el servicio para consultar el motor de recomendación."}
           </p>
         </div>
         {showResults && (
           <Button
             variant="outline"
-            onClick={() => setProviders(null)}
+            onClick={() => {
+              setProviders(null);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
             className="w-full gap-2 sm:w-auto"
           >
             <ArrowLeft className="h-4 w-4" /> Nueva búsqueda

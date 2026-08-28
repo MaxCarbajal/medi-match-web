@@ -404,7 +404,9 @@ function SearchCombobox({
         className="w-[min(90vw,520px)] min-w-[var(--radix-popover-trigger-width)] p-0"
         align="start"
       >
-        <Command>
+        <Command
+          filter={(value, search) => (value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0)}
+        >
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
             <CommandEmpty>{emptyText}</CommandEmpty>
