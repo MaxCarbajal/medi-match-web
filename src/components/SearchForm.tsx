@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Search,
@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/command";
 import { FiltrosService, ClienteService } from "@/services/api";
 import { cn } from "@/lib/utils";
-import type { BusquedaFormData, Cliente, TipoServicio } from "@/types/provider";
+import type { BusquedaFormData, Cliente, Municipio, TipoServicio } from "@/types/provider";
 
 interface Props {
   onSubmit: (data: BusquedaFormData) => void;
@@ -41,7 +41,7 @@ const hoy = new Date().toISOString().slice(0, 10);
 
 export function SearchForm({ onSubmit, loading, initialCliente }: Props) {
   const [cliente, setCliente] = useState<Cliente | null>(initialCliente ?? null);
-  const [municipio, setMunicipio] = useState("");
+  const [municipioEtiqueta, setMunicipioEtiqueta] = useState("");
   const [fechaServicio, setFechaServicio] = useState(hoy);
   const [observaciones, setObservaciones] = useState("");
   const [tratamiento, setTratamiento] = useState("");
@@ -55,26 +55,52 @@ export function SearchForm({ onSubmit, loading, initialCliente }: Props) {
     queryFn: FiltrosService.listarMunicipios,
   });
 
+  // Algunos nombres de municipio corresponden a más de un id_municipio (dos
+  // códigos distintos que el dataset llama igual, p.ej. "CHACAO") — se
+  // distinguen agregando el código a la etiqueta solo cuando hay ambigüedad,
+  // para no filtrar por texto y volver a mezclar proveedores de ambos.
+  const municipioPorEtiqueta = useMemo(() => {
+    const conteoPorNombre = new Map<string, number>();
+    for (const m of municipios) {
+      conteoPorNombre.set(m.municipio, (conteoPorNombre.get(m.municipio) ?? 0) + 1);
+    }
+    const mapa = new Map<string, Municipio>();
+    for (const m of municipios) {
+      const etiqueta =
+        (conteoPorNombre.get(m.municipio) ?? 0) > 1 ? `${m.municipio} (${m.id_municipio})` : m.municipio;
+      mapa.set(etiqueta, m);
+    }
+    return mapa;
+  }, [municipios]);
+
+  const etiquetasMunicipio = useMemo(
+    () => Array.from(municipioPorEtiqueta.keys()).sort(),
+    [municipioPorEtiqueta],
+  );
+
+  const municipioSeleccionado = municipioPorEtiqueta.get(municipioEtiqueta) ?? null;
+
   const { data: tratamientos = [], isLoading: loadingTratamientos } = useQuery({
-    queryKey: ["tratamientos", municipio],
-    queryFn: () => FiltrosService.listarTratamientos(municipio),
-    enabled: !!municipio,
+    queryKey: ["tratamientos", municipioSeleccionado?.id_municipio],
+    queryFn: () => FiltrosService.listarTratamientos(municipioSeleccionado!.id_municipio),
+    enabled: !!municipioSeleccionado,
   });
 
-  const handleMunicipioChange = (v: string) => {
-    setMunicipio(v);
+  const handleMunicipioChange = (etiqueta: string) => {
+    setMunicipioEtiqueta(etiqueta);
     setTratamiento(""); // el tratamiento anterior puede no existir en el municipio nuevo
   };
 
-  const canSubmit = !!cliente && !!municipio && !!tratamiento;
+  const canSubmit = !!cliente && !!municipioSeleccionado && !!tratamiento;
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!cliente || !canSubmit) return;
+        if (!cliente || !municipioSeleccionado || !canSubmit) return;
         onSubmit({
-          municipio,
+          id_municipio: municipioSeleccionado.id_municipio,
+          municipio: municipioSeleccionado.municipio,
           tratamiento,
           umbral_valoracion: umbralValoracion,
           cliente,
@@ -101,11 +127,11 @@ export function SearchForm({ onSubmit, loading, initialCliente }: Props) {
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Municipio" required>
             <SearchCombobox
-              items={municipios}
+              items={etiquetasMunicipio}
               placeholder={loadingMunicipios ? "Cargando municipios..." : "Selecciona municipio"}
               searchPlaceholder="Buscar municipio..."
               emptyText="No se encontró el municipio."
-              value={municipio}
+              value={municipioEtiqueta}
               onChange={handleMunicipioChange}
               open={municipioOpen}
               onOpenChange={setMunicipioOpen}
@@ -143,7 +169,7 @@ export function SearchForm({ onSubmit, loading, initialCliente }: Props) {
             <SearchCombobox
               items={tratamientos}
               placeholder={
-                !municipio
+                !municipioSeleccionado
                   ? "Selecciona un municipio primero"
                   : loadingTratamientos
                     ? "Cargando tratamientos..."
@@ -155,7 +181,7 @@ export function SearchForm({ onSubmit, loading, initialCliente }: Props) {
               onChange={setTratamiento}
               open={treatmentOpen}
               onOpenChange={setTreatmentOpen}
-              disabled={!municipio || loadingTratamientos}
+              disabled={!municipioSeleccionado || loadingTratamientos}
               loading={loadingTratamientos}
             />
           </Field>

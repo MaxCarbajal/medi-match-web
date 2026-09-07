@@ -1,5 +1,10 @@
-export interface RecomendarRequest {
+export interface Municipio {
+  id_municipio: string;
   municipio: string;
+}
+
+export interface RecomendarRequest {
+  id_municipio: string;
   tratamiento: string;
   umbral_valoracion: number;
 }
@@ -10,6 +15,7 @@ export interface Proveedor {
   coste_estimado: number;
   valoracion: number;
   capacidad_restante: number;
+  ahorro_pct: number;
   indice_ranking: number;
   modelo_aplicado: boolean;
 }
@@ -25,6 +31,7 @@ export interface Cliente {
 }
 
 export interface BusquedaFormData extends RecomendarRequest {
+  municipio: string; // nombre para mostrar (resumen, reserva) — el filtro real es id_municipio
   cliente: Cliente;
   fechaServicio: string;
   tipoServicio: TipoServicio;

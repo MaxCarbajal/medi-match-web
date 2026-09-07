@@ -6,6 +6,7 @@ import type {
   Cliente,
   Gestor,
   AsignacionDetalle,
+  Municipio,
 } from "@/types/provider";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || "http://localhost:8000";
@@ -44,9 +45,9 @@ export const ProviderService = {
 };
 
 export const FiltrosService = {
-  listarMunicipios: () => get<string[]>("/municipios"),
-  listarTratamientos: (municipio: string) =>
-    get<string[]>(`/tratamientos?municipio=${encodeURIComponent(municipio)}`),
+  listarMunicipios: () => get<Municipio[]>("/municipios"),
+  listarTratamientos: (idMunicipio: string) =>
+    get<string[]>(`/tratamientos?id_municipio=${encodeURIComponent(idMunicipio)}`),
 };
 
 export const ClienteService = {

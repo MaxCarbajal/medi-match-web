@@ -68,7 +68,7 @@ function Index({ gestor }: { gestor: Gestor }) {
     setLoading(true);
     try {
       const results = await ProviderService.recomendar({
-        municipio: data.municipio,
+        id_municipio: data.id_municipio,
         tratamiento: data.tratamiento,
         umbral_valoracion: data.umbral_valoracion,
       });

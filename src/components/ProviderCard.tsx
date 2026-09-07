@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,26 @@ export function ProviderCard({ proveedor, onSeleccionar, loading }: Props) {
             <span className="font-medium text-foreground">
               ${proveedor.coste_estimado.toFixed(2)}
             </span>
+            {Math.abs(proveedor.ahorro_pct) >= 0.5 && (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 font-medium",
+                  proveedor.ahorro_pct > 0 ? "text-success" : "text-destructive",
+                )}
+                title={
+                  proveedor.ahorro_pct > 0
+                    ? "Más barato que el promedio de esta búsqueda"
+                    : "Más caro que el promedio de esta búsqueda"
+                }
+              >
+                {proveedor.ahorro_pct > 0 ? (
+                  <TrendingUp className="h-3.5 w-3.5" />
+                ) : (
+                  <TrendingDown className="h-3.5 w-3.5" />
+                )}
+                {Math.abs(proveedor.ahorro_pct).toFixed(0)}%
+              </span>
+            )}
             <span className="text-muted-foreground">·</span>
             <span className="text-foreground">{proveedor.valoracion.toFixed(1)} ⭐</span>
             <Badge
