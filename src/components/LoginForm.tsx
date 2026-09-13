@@ -38,7 +38,7 @@ export function LoginForm({ onLogin }: Props) {
           <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-brand text-brand-foreground shadow-sm">
             <Activity className="h-6 w-6" />
           </div>
-          <div className="text-base font-semibold text-foreground">MediMatch AI</div>
+          <div className="text-base font-semibold text-foreground">MediMatch</div>
           <p className="text-sm text-muted-foreground">Inicia sesión como gestor</p>
         </CardHeader>
         <CardContent>

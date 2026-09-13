@@ -37,7 +37,7 @@ import type { AsignacionDetalle } from "@/types/provider";
 
 export const Route = createFileRoute("/asignaciones")({
   head: () => ({
-    meta: [{ title: "Asignaciones · MediMatch AI" }],
+    meta: [{ title: "Asignaciones · MediMatch" }],
   }),
   component: () => <AppShell>{() => <AsignacionesPage />}</AppShell>,
 });

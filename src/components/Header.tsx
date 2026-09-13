@@ -25,7 +25,7 @@ export function Header({ gestor, onLogout }: Props) {
           </div>
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold leading-tight text-foreground">
-              MediMatch AI
+              MediMatch
             </div>
             <div className="truncate text-xs text-muted-foreground leading-tight">
               Sistema de recomendación de proveedores

@@ -16,8 +16,13 @@ export interface Proveedor {
   valoracion: number;
   capacidad_restante: number;
   ahorro_pct: number;
+  ahorro_referencia_municipio_pct: number | null;
   indice_ranking: number;
   modelo_aplicado: boolean;
+  google_place_id: string | null;
+  google_maps_url: string | null;
+  direccion: string | null;
+  telefono: string | null;
 }
 
 export type TipoServicio = "programado" | "urgencia";

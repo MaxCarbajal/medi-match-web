@@ -19,13 +19,13 @@ export const Route = createFileRoute("/")({
   }),
   head: () => ({
     meta: [
-      { title: "MediMatch AI · Recomendación de proveedores médicos" },
+      { title: "MediMatch · Recomendación de proveedores médicos" },
       {
         name: "description",
         content:
           "Busca proveedores médicos por municipio y tratamiento, ve resultados ordenados por afinidad y reserva un cupo en tiempo real.",
       },
-      { property: "og:title", content: "MediMatch AI · Recomendación de proveedores médicos" },
+      { property: "og:title", content: "MediMatch · Recomendación de proveedores médicos" },
       {
         property: "og:description",
         content:
@@ -187,6 +187,7 @@ function Index({ gestor }: { gestor: Gestor }) {
                 items={providers!}
                 onSeleccionar={handleSeleccionar}
                 bookingId={bookingId}
+                municipio={busqueda?.municipio}
               />
             ) : (
               <EmptyState />
