@@ -55,17 +55,17 @@ export function ProviderCard({ proveedor, onSeleccionar, loading, puesto, munici
   const cuposBajos = proveedor.capacidad_restante < 3;
   const estilo = estiloPuesto(puesto);
 
-  // ahorro_pct compara contra el promedio de ESTA búsqueda -- con pocos
-  // candidatos (típico cuando no pasa por el modelo) suele dar ~0% porque no
-  // hay con qué comparar. ahorro_referencia_municipio_pct es un cálculo
-  // aparte del backend (no toca el ranking) contra el promedio de TODOS los
-  // proveedores del municipio para ese tratamiento -- se usa solo como
-  // respaldo, etiquetado distinto para no confundirlo con el de arriba.
-  const ahorroGrupoVisible = Math.abs(proveedor.ahorro_pct) >= 0.5;
+  // ahorro_referencia_municipio_pct compara contra el promedio de TODOS los
+  // proveedores del municipio para ese tratamiento (cálculo aparte del
+  // backend, no toca el ranking) -- pedido explícito del usuario: mostrar
+  // este como el ahorro principal, no el de "esta búsqueda" nada más (ver
+  // docs/DECISIONES.md, 2026-09-17). ahorro_pct (promedio de ESTA búsqueda,
+  // los que pasan el umbral) queda como respaldo solo cuando no hay
+  // referencia de municipio (1 solo proveedor ofrece el tratamiento ahí).
   const ahorroReferenciaVisible =
-    !ahorroGrupoVisible &&
     proveedor.ahorro_referencia_municipio_pct !== null &&
     Math.abs(proveedor.ahorro_referencia_municipio_pct) >= 0.5;
+  const ahorroGrupoVisible = !ahorroReferenciaVisible && Math.abs(proveedor.ahorro_pct) >= 0.5;
 
   // google_maps_url ya es un link directo al lugar (place_id verificado por
   // Google Places) para ~2/3 de los proveedores — para el resto no hay match
@@ -104,11 +104,27 @@ export function ProviderCard({ proveedor, onSeleccionar, loading, puesto, munici
             <span className="font-medium text-foreground">
               ${proveedor.coste_estimado.toFixed(2)}
             </span>
-            {ahorroGrupoVisible && (
+            {ahorroReferenciaVisible && (
               <span
                 className={cn(
                   "inline-flex items-center gap-1 font-medium",
-                  proveedor.ahorro_pct > 0 ? "text-success" : "text-destructive",
+                  proveedor.ahorro_referencia_municipio_pct! > 0 ? "text-success" : "text-destructive",
+                )}
+                title="Comparado con el promedio de todos los proveedores de este tratamiento en el municipio (no solo los que aparecen en esta búsqueda). Cálculo aparte del ranking."
+              >
+                {proveedor.ahorro_referencia_municipio_pct! > 0 ? (
+                  <TrendingUp className="h-3.5 w-3.5" />
+                ) : (
+                  <TrendingDown className="h-3.5 w-3.5" />
+                )}
+                {Math.abs(proveedor.ahorro_referencia_municipio_pct!).toFixed(0)}%
+              </span>
+            )}
+            {ahorroGrupoVisible && (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 text-xs font-medium italic",
+                  proveedor.ahorro_pct > 0 ? "text-success/80" : "text-destructive/80",
                 )}
                 title={
                   proveedor.ahorro_pct > 0
@@ -117,29 +133,11 @@ export function ProviderCard({ proveedor, onSeleccionar, loading, puesto, munici
                 }
               >
                 {proveedor.ahorro_pct > 0 ? (
-                  <TrendingUp className="h-3.5 w-3.5" />
-                ) : (
-                  <TrendingDown className="h-3.5 w-3.5" />
-                )}
-                {Math.abs(proveedor.ahorro_pct).toFixed(0)}%
-              </span>
-            )}
-            {ahorroReferenciaVisible && (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1 text-xs font-medium italic",
-                  proveedor.ahorro_referencia_municipio_pct! > 0
-                    ? "text-success/80"
-                    : "text-destructive/80",
-                )}
-                title="Estimado aparte del ranking: comparado con el promedio de todos los proveedores de este tratamiento en el municipio, no solo los que aparecen en esta búsqueda."
-              >
-                {proveedor.ahorro_referencia_municipio_pct! > 0 ? (
                   <TrendingUp className="h-3 w-3" />
                 ) : (
                   <TrendingDown className="h-3 w-3" />
                 )}
-                ~{Math.abs(proveedor.ahorro_referencia_municipio_pct!).toFixed(0)}% vs. municipio
+                {Math.abs(proveedor.ahorro_pct).toFixed(0)}%
               </span>
             )}
             <span className="text-muted-foreground">·</span>
